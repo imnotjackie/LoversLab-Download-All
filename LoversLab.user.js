@@ -40,7 +40,7 @@ for(i = 1; i < buttons.length; i++){
     (function(i){
         setTimeout(function(){
             buttons[i].click();
-        }, 1000 * i);
+        }, 3000 * i);
     }(i));
 }
 }
