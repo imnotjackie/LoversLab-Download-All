@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         LoversLab Download All
 // @namespace    N/A
-// @version      0.3
-// @description  Adds a download all button to loverslab
+// @version      0.6
+// @description  Adds a download all button to loverslab : Developed by ImNotJackie with help from Viatana 35
 // @author       ImNotJackie
 // @match        https://www.loverslab.com/*?do=download
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=loverslab.com
@@ -37,6 +37,17 @@ newRow.firstElementChild.firstElementChild.firstElementChild.textContent = "Down
 newRow.lastElementChild.className = "downloadAll";
 newRow.lastElementChild.lastElementChild.removeAttribute("href");
 var title = document.getElementsByClassName("ipsBreadcrumb ipsBreadcrumb_top ipsFaded_withHover")[0].lastElementChild.lastElementChild.lastElementChild.lastElementChild.textContent;
+// Get the target element
+var titleLoc = document.getElementsByClassName("ipsBreadcrumb ipsBreadcrumb_top ipsFaded_withHover")[0].lastElementChild.lastElementChild;
+
+// Create a new element
+var duplicateElement = titleLoc.cloneNode(true);
+
+// Replace the innerHTML of the duplicate element
+duplicateElement.innerHTML = '<div style="display: flex; align-items: center;"><span style="margin-right: 10px;"> Download Progress: 0% </span><progress id="file" value="0" max="100" style="width: 100px;"> 0% </progress></div>';
+
+// Add the duplicate element as the lastElementChild of titleLoc's parent
+titleLoc.parentNode.appendChild(duplicateElement);
 
 function downloadAll() {
     var buttons = document.getElementsByClassName("ipsButton ipsButton_primary ipsButton_small");
@@ -66,6 +77,20 @@ function downloadAll() {
         }(i));
     }
 
+    var completedFetches = 0;
+
+    // Update progress function
+    function updateProgress() {
+        completedFetches++;
+        var percent = Math.round((completedFetches / (buttons.length - 1)) * 100); // Round the percentage to the nearest whole number
+        duplicateElement.firstElementChild.firstElementChild.textContent = ' Download Progress: ' + percent + '%';
+        duplicateElement.firstElementChild.lastElementChild.value = percent;
+
+        if (percent === 100) {
+            duplicateElement.firstElementChild.firstElementChild.textContent = ' Download Complete, Zipping';
+        }
+    }
+
     // Wait for all fetch promises to resolve
     Promise.all(fetchPromises)
         .then(() => {
@@ -80,7 +105,21 @@ function downloadAll() {
                         link.click();
                     });
             }
+        })
+        .catch(error => {
+            console.error('Error downloading files:', error);
+        })
+        .finally(() => {
+            // Ensure progress reaches 100% even if there are errors
+            updateProgress();
         });
+
+    // Add an event listener to update progress when each fetch completes
+    fetchPromises.forEach(promise => {
+        promise.then(() => {
+            updateProgress();
+        });
+    });
 }
 
 
