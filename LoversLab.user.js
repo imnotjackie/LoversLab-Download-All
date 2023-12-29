@@ -86,7 +86,7 @@ function downloadAll() {
         duplicateElement.firstElementChild.firstElementChild.textContent = ' Download Progress: ' + percent + '%';
         duplicateElement.firstElementChild.lastElementChild.value = percent;
 
-        if (percent === 100) {
+        if (percent >= 100) {
             duplicateElement.firstElementChild.firstElementChild.textContent = ' Download Complete, Zipping';
         }
     }
